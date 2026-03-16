@@ -283,7 +283,7 @@
 
       <div class="card" style="padding:1rem 1.25rem 1.25rem;">
         <div class="slabel" style="margin-bottom:.75rem;">Visualização</div>
-        <div id="stackViz" style="display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:80px;flex-wrap:wrap;padding:0.25rem 0;"></div>
+        <div id="stackViz" style="min-height:120px;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;gap:2px;padding:0.5rem 0;"></div>
       </div>
 
       <div class="mgrid">
@@ -422,16 +422,32 @@
   function renderStack(n, comp, alt) {
     var el = document.getElementById('stackViz');
     el.innerHTML = '';
-    var max = Math.min(n, 22);
+    var max = Math.min(n, 18);
     var sc  = 0.52;
-    var w   = Math.max(24, Math.min(54, comp*sc));
-    var h   = Math.max(11, Math.min(26, alt*sc));
+    var w   = Math.max(60, Math.min(160, comp * sc));
+    var h   = Math.max(10, Math.min(28, alt * sc));
+    /* coluna vertical: caixas empilhadas de baixo para cima */
+    el.style.cssText = 'display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-start;gap:2px;padding:0.5rem 0;';
     for (var i = 0; i < max; i++) {
       var b = document.createElement('div');
-      b.style.cssText = 'width:'+w+'px;height:'+h+'px;background:#F7921E;border-radius:3px;opacity:0.82;border-bottom:2px solid rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-family:Barlow Condensed,sans-serif;font-size:9px;font-weight:700;color:#0D0D0D;';
-      if (i === max-1 && n > max) b.textContent = '+'+(n-max+1);
+      var isTop = (i === max - 1);
+      b.style.cssText =
+        'width:'+w+'px;height:'+h+'px;' +
+        'background:'+(isTop ? '#FFB347' : '#F7921E')+';' +
+        'border-radius:3px;' +
+        'border-top:1px solid rgba(255,255,255,0.18);' +
+        'border-bottom:2px solid rgba(0,0,0,0.35);' +
+        'display:flex;align-items:center;justify-content:center;' +
+        'font-family:Barlow Condensed,sans-serif;font-size:9px;font-weight:700;color:#0D0D0D;' +
+        'flex-shrink:0;';
+      if (isTop && n > max) b.textContent = '+'+(n - max + 1)+' cx';
       el.appendChild(b);
     }
+    /* numeração na base */
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'font-family:Barlow Condensed,sans-serif;font-size:10px;font-weight:700;color:#555;letter-spacing:0.08em;margin-top:6px;text-transform:uppercase;';
+    lbl.textContent = n === 1 ? '1 caixa' : n+' caixas';
+    el.appendChild(lbl);
   }
 
   function renderBox(C, L, A) {
