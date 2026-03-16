@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Empilhamento — Outlet das Caixas</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #F7921E; --orange-dark: #C96A00;
+    --yellow: #FFD000; --dark: #0D0D0D; --dark2: #181818;
+    --dark3: #222; --dark4: #2C2C2C; --white: #fff; --gray: #AAAAAA; --gray-dim: #555;
+  }
+  html, body { margin: 0; padding: 0; background: #0D0D0D; }
+  body { font-family: 'Barlow', sans-serif; color: #fff; min-height: 100vh; }
+
+  .wrap { max-width: 700px; margin: 0 auto; background: #0D0D0D; border-radius: 12px; overflow: hidden; }
+
+  header { background: #181818; border-bottom: 2px solid var(--orange); padding: 1.5rem; display: flex; align-items: center; gap: 1.25rem; }
+  .logo img { width: 80px; height: 80px; object-fit: contain; border-radius: 6px; }
+  .brand-name { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 2rem; line-height: 1; text-transform: uppercase; }
+  .brand-name .o { color: var(--orange); }
+  .brand-name .d { display: block; color: #fff; font-size: 0.88rem; letter-spacing: 0.15em; }
+  .sub { font-size: 12px; color: var(--gray); margin-top: 0.4rem; line-height: 1.5; }
+
+  .body { padding: 1.5rem; }
+
+  .slabel { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--orange); margin-bottom: 1rem; }
+
+  .card { background: #181818; border: 1px solid #2C2C2C; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.25rem; }
+
+  .tip { background: #181818; border: 1px solid var(--orange-dark); border-left: 4px solid var(--orange); border-radius: 0 6px 6px 0; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 12px; color: var(--gray); line-height: 1.65; }
+  .tip b { color: var(--orange); font-family: 'Barlow Condensed', sans-serif; font-size: 1.05em; letter-spacing: 0.04em; }
+
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+  @media (max-width: 480px) { .g3 { grid-template-columns: 1fr 1fr; } .g2 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray); }
+  .field small { font-size: 11px; color: var(--gray-dim); }
+  .fr { display: flex; align-items: center; background: #222; border: 1.5px solid #444; border-radius: 6px; overflow: hidden; transition: border-color 0.2s; }
+  .fr:focus-within { border-color: var(--orange); }
+  .fr input { flex: 1; border: none; background: transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 600; color: #fff; padding: 0.55rem 0.7rem; outline: none; width: 100%; min-width: 0; -moz-appearance: textfield; }
+  .fr input::-webkit-outer-spin-button, .fr input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .fr input::placeholder { color: #555; font-size: 18px; }
+  .unit { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; color: var(--orange); padding: 0 0.7rem 0 0; white-space: nowrap; }
+
+  .mat-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  @media (max-width: 480px) { .mat-group { grid-template-columns: 1fr 1fr; } }
+
+  .mat-pill { background: #222; border: 1.5px solid #444; border-radius: 6px; padding: 12px 10px 10px; cursor: pointer; text-align: center; transition: border-color 0.2s, background 0.2s; }
+  .mat-pill:hover { border-color: var(--orange-dark); }
+  .mat-pill.active { border-color: var(--orange); background: rgba(247,146,30,0.1); }
+  .mat-pill .mp-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 1px; }
+  .mat-pill .mp-esp { font-size: 10px; color: var(--gray-dim); margin-bottom: 8px; }
+  .mat-pill select { width: 100%; background: #1a1a1a; border: 1px solid #444; border-radius: 4px; padding: 5px 4px; font-size: 11px; font-family: 'Barlow', sans-serif; color: var(--gray); cursor: pointer; outline: none; }
+  .mat-pill select:focus { border-color: var(--orange); }
+  .mat-pill select option { background: #181818; }
+
+  .uso-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  @media (max-width: 480px) { .uso-group { grid-template-columns: 1fr 1fr; } }
+
+  .uso-pill { background: #222; border: 1.5px solid #444; border-radius: 6px; padding: 12px 8px; cursor: pointer; text-align: center; transition: border-color 0.2s, background 0.2s; }
+  .uso-pill:hover { border-color: var(--orange-dark); }
+  .uso-pill.active { border-color: var(--orange); background: rgba(247,146,30,0.1); }
+  .uso-pill .up-icon { font-size: 22px; margin-bottom: 5px; }
+  .uso-pill .up-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .uso-pill .up-fator { font-size: 10px; color: var(--gray-dim); }
+
+  .divider { border: none; border-top: 1px solid #2C2C2C; margin: 1.25rem 0; }
+
+  .btn { width: 100%; background: linear-gradient(135deg, #C96A00, #F7921E); border: none; border-radius: 6px; padding: 0.8rem; font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0D0D0D; cursor: pointer; }
+  .btn:hover { opacity: 0.9; }
+
+  .viz { display: flex; justify-content: center; padding: 0.75rem 0 0; }
+
+  .rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 420px) { .rgrid { grid-template-columns: 1fr; } }
+
+  .rc { border-radius: 8px; padding: 1.4rem; }
+  .rc.orange { background: linear-gradient(135deg, #C96A00, #F7921E); border: 1px solid var(--orange); }
+  .rc.dark   { background: #181818; border: 1px solid var(--orange-dark); }
+  .rc-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .rc.orange .rc-lbl { color: rgba(0,0,0,0.4); }
+  .rc.dark   .rc-lbl { color: rgba(255,255,255,0.4); }
+  .rc-val { font-family: 'Barlow Condensed', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .rc.orange .rc-val { color: #0D0D0D; }
+  .rc.dark   .rc-val { color: #fff; }
+  .rc-sub { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 0.35rem; }
+  .rc.orange .rc-sub { color: rgba(0,0,0,0.35); }
+
+  .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (max-width: 420px) { .mgrid { grid-template-columns: 1fr; } }
+
+  .mc { background: #181818; border: 1px solid #2C2C2C; border-radius: 8px; padding: 1rem 1.25rem; }
+  .mc-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+  .mc-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 800; color: #fff; line-height: 1; }
+  .mc-unit { font-size: 11px; color: var(--gray-dim); margin-top: 3px; }
+
+  .warn { background: #1a1500; border: 1px solid rgba(255,208,0,0.3); border-left: 4px solid var(--yellow); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; display: none; }
+  .warn.visible { display: flex; align-items: flex-start; gap: 0.9rem; }
+  .warn-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .warn-txt { font-size: 13px; color: #FFD000; line-height: 1.6; }
+
+  .formula { background: #181818; border: 1px solid #2C2C2C; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+  .formula .f-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--orange); margin-bottom: 8px; }
+  .formula code { display: block; font-size: 12px; font-family: 'Courier New', monospace; color: #555; line-height: 1.9; }
+  .formula code.hi { color: #888; }
+
+  .banner { background: #181818; border: 1px solid var(--orange-dark); border-left: 4px solid var(--orange); border-radius: 8px; padding: 1.1rem 1.25rem; display: flex; align-items: flex-start; gap: 0.9rem; margin-bottom: 1.25rem; }
+  .banner-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .banner-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--orange); display: block; margin-bottom: 4px; }
+  .banner-txt { font-size: 13px; line-height: 1.6; color: var(--gray); }
+  .banner-txt b { color: var(--yellow); font-family: 'Barlow Condensed', sans-serif; font-size: 1.1em; }
+
+  .nota { background: #181818; border: 1px solid #2C2C2C; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .nota p { font-size: 12px; color: #555; line-height: 1.7; }
+  .nota strong { color: #888; }
+
+  .footer { text-align: center; padding: 1rem 0 0.5rem; border-top: 1px solid #222; }
+  .footer-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 800; text-transform: uppercase; }
+  .footer-name span { color: var(--orange); }
+  .footer-sub { font-size: 11px; color: #555; margin-top: 3px; }
+
+  .result-block { display: none; }
+  .result-block.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <img src="https://dcdn-us.mitiendanube.com/stores/007/208/667/themes/common/logo-1050377029-1769117382-626918b0fc922a95fde2ca588cd7e3841769117382-640-0.webp" alt="Outlet das Caixas" />
+    </div>
+    <div>
+      <div class="brand-name"><span class="o">OUTLET</span><span class="d">DAS CAIXAS</span></div>
+      <p class="sub">Calcule o empilhamento máximo seguro da sua caixa.<br>Informe as dimensões e o peso do produto.</p>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <div class="slabel">Dimensões da embalagem</div>
+    <div class="card">
+
+      <div class="tip">
+        <b>Identifique a onda pelo papelão:</b>&nbsp; onda B = 2,4–3,0 mm &nbsp;·&nbsp; onda C = 3,5–4,1 mm &nbsp;·&nbsp; onda BC = 5,7–6,3 mm
+      </div>
+
+      <div class="g3">
+        <div class="field">
+          <label for="comp">Comprimento</label>
+          <div class="fr"><input type="number" id="comp" placeholder="ex.: 30" min="1" /><span class="unit">cm</span></div>
+        </div>
+        <div class="field">
+          <label for="larg">Largura</label>
+          <div class="fr"><input type="number" id="larg" placeholder="ex.: 20" min="1" /><span class="unit">cm</span></div>
+        </div>
+        <div class="field">
+          <label for="alt">Altura</label>
+          <div class="fr"><input type="number" id="alt" placeholder="ex.: 15" min="1" /><span class="unit">cm</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="slabel" style="margin-bottom:.75rem;">Material da caixa</div>
+
+      <div class="mat-group" id="matGroup">
+        <div class="mat-pill active" data-onda="B" data-ecm="6" onclick="selMat(this)">
+          <div class="mp-name">Onda B</div>
+          <div class="mp-esp">2,4 – 3,0 mm</div>
+          <select id="ecmB" onclick="event.stopPropagation()" onchange="syncECM('B',this.value)">
+            <option value="4">ECM 4 kgf/cm</option>
+            <option value="5">ECM 5 kgf/cm</option>
+            <option value="6" selected>ECM 6 kgf/cm</option>
+            <option value="7">ECM 7 kgf/cm</option>
+            <option value="8">ECM 8 kgf/cm</option>
+          </select>
+        </div>
+        <div class="mat-pill" data-onda="C" data-ecm="6" onclick="selMat(this)">
+          <div class="mp-name">Onda C</div>
+          <div class="mp-esp">3,5 – 4,1 mm</div>
+          <select id="ecmC" onclick="event.stopPropagation()" onchange="syncECM('C',this.value)">
+            <option value="4">ECM 4 kgf/cm</option>
+            <option value="5">ECM 5 kgf/cm</option>
+            <option value="6" selected>ECM 6 kgf/cm</option>
+            <option value="7">ECM 7 kgf/cm</option>
+            <option value="8">ECM 8 kgf/cm</option>
+          </select>
+        </div>
+        <div class="mat-pill" data-onda="BC" data-ecm="8" onclick="selMat(this)">
+          <div class="mp-name">Onda BC</div>
+          <div class="mp-esp">5,7 – 6,3 mm</div>
+          <select id="ecmBC" onclick="event.stopPropagation()" onchange="syncECM('BC',this.value)">
+            <option value="6">ECM 6 kgf/cm</option>
+            <option value="7">ECM 7 kgf/cm</option>
+            <option value="8" selected>ECM 8 kgf/cm</option>
+            <option value="9">ECM 9 kgf/cm</option>
+            <option value="10">ECM 10 kgf/cm</option>
+            <option value="12">ECM 12 kgf/cm</option>
+            <option value="14">ECM 14 kgf/cm</option>
+            <option value="16">ECM 16 kgf/cm</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="g2">
+        <div class="field">
+          <label for="peso">Peso da caixa cheia</label>
+          <div class="fr"><input type="number" id="peso" placeholder="ex.: 5" min="0.1" step="0.1" /><span class="unit">kg</span></div>
+          <small>peso máximo por caixa</small>
+        </div>
+        <div class="field">
+          <label for="altMax">Altura máxima (opcional)</label>
+          <div class="fr"><input type="number" id="altMax" placeholder="sem limite" min="1" /><span class="unit">cm</span></div>
+          <small>limite do armazém ou caminhão</small>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="slabel" style="margin-bottom:.75rem;">Condição de uso</div>
+
+      <div class="uso-group" id="usoGroup">
+        <div class="uso-pill active" data-fator="0.60" onclick="selUso(this)">
+          <div class="up-icon">🏪</div>
+          <div class="up-name">Mercado interno</div>
+          <div class="up-fator">fator 0,60</div>
+        </div>
+        <div class="uso-pill" data-fator="0.50" onclick="selUso(this)">
+          <div class="up-icon">🚢</div>
+          <div class="up-name">Mercado externo</div>
+          <div class="up-fator">fator 0,50</div>
+        </div>
+        <div class="uso-pill" data-fator="0.40" onclick="selUso(this)">
+          <div class="up-icon">❄️</div>
+          <div class="up-name">Frigoríficos / frutas</div>
+          <div class="up-fator">fator 0,40</div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="calcular()">▶ Calcular empilhamento</button>
+
+      <div class="viz">
+        <svg id="bsvg" width="220" height="130" viewBox="0 0 220 130" fill="none">
+          <ellipse id="sombra" cx="90" cy="115" rx="55" ry="6" fill="rgba(247,146,30,0.1)"/>
+          <polygon id="ff" fill="#7A3D00" stroke="#C96A00" stroke-width="1.2"/>
+          <polygon id="ft" fill="#F7921E" stroke="#C96A00" stroke-width="1.2"/>
+          <polygon id="fs" fill="#C96A00" stroke="#C96A00" stroke-width="1.2"/>
+          <text id="lc" font-family="Barlow Condensed" font-size="10" font-weight="600" fill="#F7921E" text-anchor="middle"/>
+          <text id="ll" font-family="Barlow Condensed" font-size="10" font-weight="600" fill="#F7921E" text-anchor="start"/>
+          <text id="la" font-family="Barlow Condensed" font-size="10" font-weight="600" fill="#F7921E" text-anchor="end"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="result-block" id="resultBlock">
+
+      <div class="slabel">Resultado</div>
+
+      <div class="warn" id="warnBox">
+        <div class="warn-icon">⚠️</div>
+        <div class="warn-txt" id="warnTxt"></div>
+      </div>
+
+      <div class="rgrid">
+        <div class="rc orange">
+          <div class="rc-lbl">Empilhamento máximo</div>
+          <div class="rc-val" id="r-num">—</div>
+          <div class="rc-sub">caixas empilhadas</div>
+        </div>
+        <div class="rc dark">
+          <div class="rc-lbl">Altura total da pilha</div>
+          <div class="rc-val" id="r-alt">—</div>
+          <div class="rc-sub" id="r-altm">—</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1rem 1.25rem 1.25rem;">
+        <div class="slabel" style="margin-bottom:.75rem;">Visualização</div>
+        <div id="stackViz" style="display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:80px;flex-wrap:wrap;padding:0.25rem 0;"></div>
+      </div>
+
+      <div class="mgrid">
+        <div class="mc">
+          <div class="mc-lbl">Resistência BCT</div>
+          <div class="mc-val" id="m-bct">—</div>
+          <div class="mc-unit">kgf</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Carga máxima suportada</div>
+          <div class="mc-val" id="m-carga">—</div>
+          <div class="mc-unit">kgf</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Perímetro da caixa</div>
+          <div class="mc-val" id="m-perim">—</div>
+          <div class="mc-unit">cm</div>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">Peso total empilhado</div>
+          <div class="mc-val" id="m-peso">—</div>
+          <div class="mc-unit">kg</div>
+        </div>
+      </div>
+
+      <div class="formula">
+        <div class="f-lbl">Fórmula McKee simplificada</div>
+        <code>BCT = 5,876 × ECM × √(espessura × perímetro)</code>
+        <code>N = (BCT × fator de uso) ÷ peso por caixa</code>
+        <code class="hi" id="f-det"></code>
+      </div>
+
+      <div class="banner">
+        <div class="banner-icon">📦</div>
+        <div>
+          <span class="banner-lbl">Sobre o resultado</span>
+          <p class="banner-txt">A caixa <b id="b-onda">—</b> com ECM <b id="b-ecm">—</b> suporta uma carga máxima de <b id="b-carga">—</b> no fator de uso selecionado.</p>
+        </div>
+      </div>
+
+      <div class="nota">
+        <p>Os valores são <strong>estimativas</strong> baseadas nas dimensões e material informados. O resultado final pode variar conforme umidade, condições de armazenamento e lote do material. Para aplicações críticas, solicite ensaio de compressão (BCT real).</p>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <div class="footer-name"><span>Outlet</span> das Caixas</div>
+      <div class="footer-sub">Calculadora de empilhamento · Valores estimados</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  var ESP = { B: 0.27, C: 0.38, BC: 0.60 };
+  var onda = 'B', ecm = 6, fator = 0.60;
+
+  function selMat(el) {
+    document.querySelectorAll('.mat-pill').forEach(function(e){ e.classList.remove('active'); });
+    el.classList.add('active');
+    onda = el.dataset.onda;
+    ecm = parseFloat(el.dataset.ecm);
+  }
+
+  function syncECM(o, v) {
+    var c = document.querySelector('[data-onda="'+o+'"]');
+    c.dataset.ecm = v;
+    if (onda === o) ecm = parseFloat(v);
+  }
+
+  function selUso(el) {
+    document.querySelectorAll('.uso-pill').forEach(function(e){ e.classList.remove('active'); });
+    el.classList.add('active');
+    fator = parseFloat(el.dataset.fator);
+  }
+
+  function calcular() {
+    var C = parseFloat(document.getElementById('comp').value);
+    var L = parseFloat(document.getElementById('larg').value);
+    var A = parseFloat(document.getElementById('alt').value);
+    var P = parseFloat(document.getElementById('peso').value);
+    var amv = document.getElementById('altMax').value;
+    var altMax = amv ? parseFloat(amv) : null;
+
+    if (!C||!L||!A||!P||C<=0||L<=0||A<=0||P<=0) {
+      alert('Preencha comprimento, largura, altura e peso com valores válidos.');
+      return;
+    }
+
+    var esp   = ESP[onda];
+    var perim = 2*(C+L);
+    var BCT   = 5.876 * ecm * Math.sqrt(esp * perim);
+    var carga = BCT * fator;
+    var n     = Math.floor(carga / P);
+    if (n < 1) n = 1;
+    var nSL = n;
+    var altTotal = n * A;
+    var lim = false;
+
+    if (altMax && altTotal > altMax) {
+      n = Math.floor(altMax / A);
+      if (n < 1) n = 1;
+      altTotal = n * A;
+      lim = true;
+    }
+
+    document.getElementById('r-num').textContent    = n;
+    document.getElementById('r-alt').textContent    = altTotal.toFixed(1)+' cm';
+    document.getElementById('r-altm').textContent   = (altTotal/100).toFixed(2)+' m';
+    document.getElementById('m-bct').textContent    = BCT.toFixed(1);
+    document.getElementById('m-carga').textContent  = carga.toFixed(1);
+    document.getElementById('m-perim').textContent  = perim.toFixed(0);
+    document.getElementById('m-peso').textContent   = (n*P).toFixed(1);
+    document.getElementById('b-onda').textContent   = 'Onda '+onda;
+    document.getElementById('b-ecm').textContent    = ecm+' kgf/cm';
+    document.getElementById('b-carga').textContent  = carga.toFixed(1)+' kgf';
+    document.getElementById('f-det').textContent    =
+      'BCT = 5,876 × '+ecm+' × √('+esp+' × '+perim.toFixed(1)+') = '+BCT.toFixed(1)+
+      ' kgf  →  N = ('+BCT.toFixed(1)+' × '+fator+') ÷ '+P+' = '+nSL+' caixas';
+
+    var wb = document.getElementById('warnBox');
+    if (lim) {
+      document.getElementById('warnTxt').textContent =
+        'Empilhamento limitado pela altura máxima de '+altMax+' cm. Sem essa restrição o material suportaria '+nSL+' caixas.';
+      wb.classList.add('visible');
+    } else { wb.classList.remove('visible'); }
+
+    renderStack(n, C, A);
+    renderBox(C, L, A);
+
+    document.getElementById('resultBlock').classList.add('visible');
+    document.getElementById('resultBlock').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  function renderStack(n, comp, alt) {
+    var el = document.getElementById('stackViz');
+    el.innerHTML = '';
+    var max = Math.min(n, 22);
+    var sc  = 0.52;
+    var w   = Math.max(24, Math.min(54, comp*sc));
+    var h   = Math.max(11, Math.min(26, alt*sc));
+    for (var i = 0; i < max; i++) {
+      var b = document.createElement('div');
+      b.style.cssText = 'width:'+w+'px;height:'+h+'px;background:#F7921E;border-radius:3px;opacity:0.82;border-bottom:2px solid rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-family:Barlow Condensed,sans-serif;font-size:9px;font-weight:700;color:#0D0D0D;';
+      if (i === max-1 && n > max) b.textContent = '+'+(n-max+1);
+      el.appendChild(b);
+    }
+  }
+
+  function renderBox(C, L, A) {
+    var sc=48/Math.max(C,L,A,1), sw=C*sc, sl=L*sc, sh=A*sc;
+    var ox=25, oy=100, dx=sl*0.55, dy=sl*0.32;
+    document.getElementById('ff').setAttribute('points', ox+','+oy+' '+(ox+sw)+','+oy+' '+(ox+sw)+','+(oy-sh)+' '+ox+','+(oy-sh));
+    document.getElementById('ft').setAttribute('points', ox+','+(oy-sh)+' '+(ox+sw)+','+(oy-sh)+' '+(ox+sw+dx)+','+(oy-sh-dy)+' '+(ox+dx)+','+(oy-sh-dy));
+    document.getElementById('fs').setAttribute('points', (ox+sw)+','+oy+' '+(ox+sw+dx)+','+(oy-dy)+' '+(ox+sw+dx)+','+(oy-sh-dy)+' '+(ox+sw)+','+(oy-sh));
+    document.getElementById('sombra').setAttribute('cx', ox+sw/2+dx/2);
+    document.getElementById('sombra').setAttribute('rx', (sw+dx)*0.42);
+    document.getElementById('lc').setAttribute('x',ox+sw/2); document.getElementById('lc').setAttribute('y',oy+15); document.getElementById('lc').textContent=C+'cm';
+    document.getElementById('ll').setAttribute('x',ox+sw+dx+5); document.getElementById('ll').setAttribute('y',oy-dy/2+3); document.getElementById('ll').textContent=L+'cm';
+    document.getElementById('la').setAttribute('x',ox-4); document.getElementById('la').setAttribute('y',oy-sh/2+3); document.getElementById('la').textContent=A+'cm';
+  }
+</script>
+</body>
+</html>
